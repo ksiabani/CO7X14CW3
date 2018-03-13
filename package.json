@@ -1,0 +1,14 @@
+{
+  "name": "co7x14cw3",
+  "version": "1.0.0",
+  "description": "Worksheet 3: REST Service Implementation and Testing",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kostas Siabanis",
+  "license": "MIT",
+  "dependencies": {
+    "twitter-node-client": "0.0.6"
+  }
+}
