@@ -1,100 +1,90 @@
-let Twitter = require('twitter-node-client').Twitter;
-
-let config = {
-    "consumerKey": "Hf5ePvk7gctj7P0SSQuRCtKZb",
-    "consumerSecret": "7romrCT0ilht1JmIKaE0WG0xGS5KiTSDSzyiR90IRetCJvINvT",
-    "accessToken": "2417284658-DdzI9SV7Dn43CoERnlrGvC4Y6S0YLYeAOD5G3GQ",
-    "accessTokenSecret": "aVKys4oz0yihVJ6e5gijCGHlmc8E0EzL6o0gy5nRbage6"
-};
-
-//Callback functions
-let error = function (err, response, body) {
-    console.log('ERROR [%s]', JSON.stringify(err));
-};
-let success = function (data) {
-    console.log('Data [%s]', data);
-};
-
-let twitter = new Twitter(config);
+/**
+ * App dependencies
+ */
+const axios = require('axios');
+const Mock = require('./mock');
+const Twitter = require('twitter');
 
 
-// twitter.getUserTimeline({ screen_name: 'ksiabani', count: '10'}, error, success);
-// Twitter.prototype.getUserTimeline = function (params, error, success) {
-//     var path = '/statuses/user_timeline.json' + this.buildQS(params);
-//     var url = this.baseUrl + path;
-//     this.doRequest(url, error, success);
-// };
+const serviceBaseUrl = 'https://campus.cs.le.ac.uk/tyche/CO7214Rest3/rest/soa/';
+const accessCode = 'ks4513';
+const baseUrl = serviceBaseUrl + 'getUserName/' + accessCode;
+const getUserName = url => axios.get(url);
+const mock = Mock.data;
+
+let twitter = new Twitter({
+    consumer_key: "Hf5ePvk7gctj7P0SSQuRCtKZb",
+    consumer_secret: "7romrCT0ilht1JmIKaE0WG0xGS5KiTSDSzyiR90IRetCJvINvT",
+    access_token_key: "2417284658-DdzI9SV7Dn43CoERnlrGvC4Y6S0YLYeAOD5G3GQ",
+    access_token_secret: "aVKys4oz0yihVJ6e5gijCGHlmc8E0EzL6o0gy5nRbage6"
+});
+
+// Ready? Go!
+runAnalytics();
+
+// Run analytics
+function runAnalytics() {
+    // Request a user name from SOA2018CW3 service
+    getUserName(baseUrl)
+        .then(response => {
+
+            // This is our username to use for the operations below
+            const screenName = response.data;
+
+            /**
+             * Operation submitNumberFollowed
+             */
+
+            // Get number of users followed with Twitter API
+            getNumberFollowed(screenName)
+                .then(data => {
+
+                    // NumberFollowed is the length of the array returned
+                    const numberFollowed = data.ids.length;
+
+                    // Submit the results to the SOA2018CW3 service
+                    submitNumberFollowed(screenName, numberFollowed)
+                        .then(response => {
+                            // Pass or fail
+                            console.log('Operation submitNumberFollowed ', response.data);
+                        })
+                });
 
 
-// Get user timeline
-function getUserTimeline() {
-    let url = 'https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=ksiabani&count=10';
-    twitter.doRequest(url, error, success);
+            /**
+             * Operation submitNumberOfTweetsReceived
+             */
+
+            /**
+             * Operation submitNumberOfRetweets
+             */
+
+            /**
+             * Operation submitMostActiveFollowed
+             */
+
+        })
+        .catch(() => {
+            console.log('Oooops... Something went wrong!');
+        });
 }
 
-getUserTimeline();
+// Twitter calls
+function getNumberFollowed(screenName) {
+    let url = 'friends/ids.json';
+    let params = {cursor: -1, screen_name: screenName, count: 5000};
+    return twitter.get(url, params);
+}
+
+
+// SOA2018CW3 service calls
+function submitNumberFollowed(screenName, numberFollowed) {
+    const url = `https://campus.cs.le.ac.uk/tyche/CO7214Rest3/rest/soa/submitNumberFollowed/ks4513/${screenName}/${numberFollowed}`;
+    // console.log(url);
+    return axios.get(url);
+}
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-// let Twitter = require('twitter-node-client').Twitter;
-
-
-
-
-
-
-//Example calls
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// twitter.getMentionsTimeline({ count: '10'}, error, success);
-//
-// twitter.getHomeTimeline({ count: '10'}, error, success);
-//
-// twitter.getReTweetsOfMe({ count: '10'}, error, success);
-//
-// twitter.getTweet({ id: '1111111111'}, error, success);
-
-
-//
-// Get 10 tweets containing the hashtag haiku
-//
-
-// twitter.getSearch({'q':'#haiku','count': 10}, error, success);
-
-//
-// Get 10 popular tweets with a positive attitude about a movie that is not scary
-//
-
-// twitter.getSearch({'q':' movie -scary :) since:2013-12-27', 'count': 10, 'result\_type':'popular'}, error, success);
