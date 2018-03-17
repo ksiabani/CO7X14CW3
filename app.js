@@ -1,4 +1,9 @@
 /**
+ * You can run this app online here: https://repl.it/repls/WeeRoundedConnection
+ * Just visit the link and press Run, no need to sign up
+ */
+
+/**
  * App dependencies:
  * Axios is an HTTP client (https://github.com/axios/axios)
  * Twitter is the a twitter client for JavaScript (https://github.com/desmondmorris/node-twitter)
@@ -21,13 +26,27 @@ let twitter = new Twitter({
 });
 
 // Ready? Go!
-runAnalytics();
+// We setup a time interval to run our analytics function 4 times
+// Because of the asynchronous nature of JavaScript we set a time delay of 2s between calls or things get weird
+let i = 1;
+let myInterval = setInterval(() => {
+    i < 5 && console.warn(`Running analytics ${i}`);
+    runAnalytics();
+}, 2000);
+
 
 /**
  * Functions definitions
- * runAnalytis is the main function of the program, will do all Twitter API calls and all calls to SOA2018CW3 service
+ * runAnalytics is the main function of the program, will do all Twitter API calls and all calls to SOA2018CW3 service
  */
 function runAnalytics() {
+
+    // Remember to remove the interval after the function is invoked 4 times
+    i++;
+    if (i > 5) {
+        clearInterval(myInterval);
+        return;
+    }
 
     // Instantiate friends array
     let friends = [];
@@ -55,10 +74,10 @@ function runAnalytics() {
                         return a + b.statuses_count;
                     }, 0);
 
-                    // The friends with the more tweets is the most active one. To get it we:
-                    // 1. Sort and reverse the array of friends based on field "statuses_count"
+                    // The friend with the biggest number of tweets is the most active one. To get it, we:
+                    // 1. Sort and reverse the array of friends based on the field "statuses_count" (status = tweet)
                     // 2. Return the name of the first one in the array
-                    const mostActiveFollowed = friends.sort((a,b) => {
+                    const mostActiveFollowed = friends.sort((a, b) => {
                         return (a.statuses_count || 0) - b.statuses_count;
                     }).reverse()[0].screen_name;
 
